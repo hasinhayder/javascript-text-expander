@@ -3,7 +3,6 @@ var textExpander = function (textObjects, dictionary) {
     if (!dictionary || !textObjects) {
         return;
     }
-    console.log(textObjects instanceof Array);
     if (!(textObjects instanceof Array)) {
         textObjects = [textObjects];
     }
