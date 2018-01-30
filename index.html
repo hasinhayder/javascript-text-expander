@@ -12,9 +12,9 @@
 <h1>Text Expander Demo</h1>
 <textarea name="" id="ta1" cols="140" rows="20"></textarea>
 
-<div class="info">Type any of these words
-    <div>ss</div>
-    and hit <strong>spacebar</strong>, or any of these keys <strong>",.!?;:"</strong><br/>
+<div class="info"><br/>Type any of these words <br/><br/>
+    <div class="keys">ss</div><br/>
+    and hit <strong>spacebar</strong>, or any of these keys <strong>",.!?;:"</strong><br/><br/>
     For example, type this sentence naturally and don't copy-paste - <i>"My gd computer's os is windows and fyfi I thought it was a bfd!"</i>
 </div>
 
@@ -48,7 +48,10 @@
         "fyvm": "fuck you very much",
         "nfg": "not fucking good",
     };
+
     textExpander([document.querySelector("#ta1")], dictionary);
+
+    document.querySelector("div.keys").innerHTML = Object.keys(dictionary).join(", ");
 </script>
 </body>
 </html>
