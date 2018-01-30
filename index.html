@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Expander Demo</title>
+    <style>
+        body {
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>Text Expander Demo</h1>
+<textarea name="" id="ta1" cols="140" rows="10">How is my abs working on your bike, lol ha ha?</textarea>
+
+<div class="info">Type any of these words
+    <div>ss</div>
+    and hit <strong>spacebar</strong>, or any of these keys <strong>",.!?;:"</strong><br/>
+    For example, type this sentence naturally and don't copy-paste - <i>"My gd computer's os is windows and fyfi I thought it was a bfd!"</i>
+</div>
+
+
+<script type="text/javascript">
+    var dictionary = {
+        "os":"operating system",
+        "wtf": "what the fuck",
+        "lol": "laughing out loud",
+        "roflmao": "rolling on the floor laughing my ass off",
+        "stfu": "shut the fuck up",
+        "ms": "micro-fucking-soft",
+        "windows": "a complete fucking crap",
+        "fu": "fuck you",
+        "omg": "oh my god",
+        "gtfo": "get the fuck out",
+        "bfd": "big fucking deal",
+        "fyfi": "for your fucking information",
+        "fyi": "for your information",
+        "gn": "good night",
+        "gd": "goddamn",
+        "ftw": "fuck the world", //or for the win? he he
+        "idk": "I dont know",
+        "ikr": "i know right",
+        "idgaf": "I don't give a fuck",
+        "fml": "fuck my life",
+        "dilligaf": "do I look like I give a fuck",
+        "rtfm": "read the fucking manual",
+        "asafp": "as soon as fucking possible",
+        "fyvm": "fuck you very much",
+        "nfg": "not fucking good",
+    }
+    var textExpander = function (textObjects, dictionary) {
+        "use strict";
+        if (!dictionary || !textObjects) {
+            return;
+        }
+        console.log(textObjects instanceof Array);
+        if (!(textObjects instanceof Array)) {
+            textObjects = [textObjects];
+        }
+
+        textObjects.forEach(function (textObject) {
+            if(textObject){
+                textObject.removeEventListener("keydown", textExpanderEventListener); //remove duplicate event listener, if any
+                textObject.addEventListener("keydown", textExpanderEventListener);
+            }
+        });
+
+        function textExpanderEventListener(data) {
+            if (" ,.!?;:".indexOf(data.key) !== -1) {
+                var selection = getCaretPosition(this);
+                var result = /\S+$/.exec(this.value.slice(0, selection.end));
+                if (result) {
+                    var lastWord = result[0];
+                    var selectionStart = result.input.length - lastWord.length;
+                    replaceLastWord(this, selectionStart, result.input.length, lastWord.toLocaleLowerCase());
+                }
+            }
+        }
+
+
+        function getCaretPosition(ctrl) {
+            var start, end;
+            if (ctrl.setSelectionRange) {
+                start = ctrl.selectionStart;
+                end = ctrl.selectionEnd;
+            } else if (document.selection && document.selection.createRange) {
+                var range = document.selection.createRange();
+                start = 0 - range.duplicate().moveStart('character', -100000);
+                end = start + range.text.length;
+            }
+            return {
+                start: start,
+                end: end
+            }
+        }
+
+        function replaceLastWord(ctrl, start, end, key) {
+            var rangeLength = end - start;
+            var replaceWith = dictionary[key];
+            if (!replaceWith) {
+                return;
+            }
+            if (ctrl.setSelectionRange) {
+                /* WebKit */
+                ctrl.focus();
+                ctrl.setSelectionRange(start, end);
+            }
+            else if (ctrl.createTextRange) {
+                /* IE */
+                var range = ctrl.createTextRange();
+                rangctrl.collapse(true);
+                rangctrl.moveEnd('character', end);
+                rangctrl.moveStart('character', start);
+                rangctrl.select();
+            }
+            else if (ctrl.selectionStart) {
+                ctrl.selectionStart = start;
+                ctrl.selectionEnd = end;
+            }
+            if (replaceWith) {
+                ctrl.value = ctrl.value.substring(0, start) + replaceWith + ctrl.value.substr(end);
+                ctrl.setSelectionRange(end + replaceWith.length, end + replaceWith.length - (rangeLength))
+            }
+        }
+
+    };
+
+    textExpander([document.querySelector("#ta1")], dictionary);
+</script>
+</body>
+</html>
