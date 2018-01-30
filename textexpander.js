@@ -21,7 +21,7 @@ var textExpander = function (textObjects, dictionary) {
             if (result) {
                 var lastWord = result[0];
                 var selectionStart = result.input.length - lastWord.length;
-                replaceLastWord(this, selectionStart, result.input.length, lastWord.toLocaleLowerCase());
+                replaceLastWord(this, selectionStart, result.input.length, lastWord.toLowerCase());
             }
         }
     }
