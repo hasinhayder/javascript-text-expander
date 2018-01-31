@@ -15,6 +15,12 @@ var textExpander = function (textObjects, dictionary) {
     });
 
     function textExpanderEventListener(data) {
+        if( (data.which == 90 || data.keyCode == 90) && data.ctrlKey && textExpander.lastReplaced ) {
+            data.preventDefault();
+            this.value = this.value.replace(new RegExp(dictionary[textExpander.lastReplaced] + ' $'), textExpander.lastReplaced + ' ');
+            delete textExpander.lastReplaced;
+            return;
+        }
         if (" ,.!?;:".indexOf(data.key) !== -1) {
             var selection = getCaretPosition(this);
             var result = /\S+$/.exec(this.value.slice(0, selection.end));
@@ -68,7 +74,8 @@ var textExpander = function (textObjects, dictionary) {
         }
         if (replaceWith) {
             ctrl.value = ctrl.value.substring(0, start) + replaceWith + ctrl.value.substr(end);
-            ctrl.setSelectionRange(end + replaceWith.length, end + replaceWith.length - (rangeLength))
+            ctrl.setSelectionRange(end + replaceWith.length, end + replaceWith.length - (rangeLength));
+            textExpander.lastReplaced = key;
         }
     }
 
