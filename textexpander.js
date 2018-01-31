@@ -47,7 +47,7 @@ var textExpander = function (textObjects, dictionary) {
             if (result) {
                 var lastWord = result[0];
                 var selectionStart = result.input.length - lastWord.length;
-                replaceLastWord(this, selectionStart, result.input.length, lastWord.toLowerCase());
+                replaceLastWord(this, selectionStart, result.input.length, lastWord);
             }
         }
     }
@@ -86,8 +86,9 @@ var textExpander = function (textObjects, dictionary) {
     }
 
     function replaceLastWord(ctrl, start, end, key) {
+        var isCap = key.toUpperCase() === key;
         var rangeLength = end - start;
-        var replaceWith = dictionary[key];
+        var replaceWith = dictionary[key.toLowerCase()];
         if (!replaceWith) {
             return;
         }
@@ -109,7 +110,7 @@ var textExpander = function (textObjects, dictionary) {
             ctrl.selectionEnd = end;
         }
         if (replaceWith) {
-            ctrl.value = ctrl.value.substring(0, start) + replaceWith + ctrl.value.substr(end);
+            ctrl.value = ctrl.value.substring(0, start) + (isCap ? replaceWith.toUpperCase() : replaceWith) + ctrl.value.substr(end);
             ctrl.setSelectionRange(end + replaceWith.length, end + replaceWith.length - (rangeLength));
             ctrl.dataset.lastReplaced = key;
         }
