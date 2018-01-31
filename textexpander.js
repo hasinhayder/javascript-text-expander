@@ -15,10 +15,14 @@ var textExpander = function (textObjects, dictionary) {
     });
 
     function textExpanderEventListener(data) {
-        if( (data.which == 90 || data.keyCode == 90) && data.ctrlKey && textExpander.lastReplaced ) {
-            data.preventDefault();
-            this.value = this.value.replace(new RegExp(dictionary[textExpander.lastReplaced] + ' $'), textExpander.lastReplaced + ' ');
-            delete textExpander.lastReplaced;
+        if( (data.which == 90 || data.keyCode == 90) && data.ctrlKey && this.dataset.lastReplaced && this.dataset.lastKeystroke ) {
+            var regexp = new RegExp(dictionary[this.dataset.lastReplaced] + this.dataset.lastKeystroke + '$');
+            if( regexp.test( this.value ) ) {
+                data.preventDefault();
+                this.value = this.value.replace(regexp, this.dataset.lastReplaced + this.dataset.lastKeystroke);
+            }
+            delete this.dataset.lastReplaced;
+            delete this.dataset.lastKeystroke;
             return;
         }
         if (" ,.!?;:".indexOf(data.key) !== -1) {
@@ -28,10 +32,10 @@ var textExpander = function (textObjects, dictionary) {
                 var lastWord = result[0];
                 var selectionStart = result.input.length - lastWord.length;
                 replaceLastWord(this, selectionStart, result.input.length, lastWord.toLowerCase());
+                this.dataset.lastKeystroke = data.key;
             }
         }
     }
-
 
     function getCaretPosition(ctrl) {
         var start, end;
@@ -75,7 +79,7 @@ var textExpander = function (textObjects, dictionary) {
         if (replaceWith) {
             ctrl.value = ctrl.value.substring(0, start) + replaceWith + ctrl.value.substr(end);
             ctrl.setSelectionRange(end + replaceWith.length, end + replaceWith.length - (rangeLength));
-            textExpander.lastReplaced = key;
+            ctrl.dataset.lastReplaced = key;
         }
     }
 
