@@ -37,8 +37,6 @@ var textExpander = function (textObjects, dictionary) {
             delete this.dataset.lastReplaced;
             delete this.dataset.lastKeystroke;
             return;
-        }else{
-
         }
 
         if (actionKeys.indexOf(dataKey) !== -1) {
