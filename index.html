@@ -1,28 +1,59 @@
+</html>
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Text Expander Demo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Inferior® Text Expander</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cutestrap/1.3.1/css/cutestrap.min.css">
     <style>
-        body {
-            padding: 20px;
+        section.wrapper{
+            padding-top: 1em;
+            padding-bottom: 1em;
         }
     </style>
 </head>
+
 <body>
-<h1>Text Expander Demo</h1>
-<textarea name="" id="ta1" cols="140" rows="20"></textarea>
+<header class="wrapper-large ta-center">
+    <h1>Text Expander</h1>
+</header>
+<section class="wrapper">
+    <label class="textfield">
+        <textarea name="inpText" id="inpText" cols="90" rows="8"></textarea>
+        <span class="textfield__label">Type something</span>
+    </label>
+</section>
+<section class="wrapper">
+    <h3>Type any of these words:</h3>
+    <div class="keys">omg</div>
+    <h3>And then press
+        <code>space</code> or any of these:
+        <b>
+            <i>,</i>
+            <i>.</i>
+            <i>!</i>
+            <i>?</i>
+        </b>
+    </h3>
 
-<div class="info"><br/>Type any of these words <br/><br/>
-    <div class="keys">ss</div><br/>
-    and hit <strong>spacebar</strong>, or any of these keys <strong>",.!?;:"</strong><br/><br/>
-    For example, type this sentence naturally and don't copy-paste - <i>"My gd computer's os is windows and fyfi I thought it was a bfd!"</i>
-</div>
-
+    <p>For example, type this sentence manually(don't copy-paste):
+        <br/>
+        <i>"My gd computer's os is windows and fyfi I thought it was a bfd!"</i>
+    </p>
+</section>
+<footer class="wrapper-large ta-center">
+    <em>Originally Created by
+        <a href="https://github.com/hasinhayder">Hasin Hayder</a>,</em>
+    and <a href="https://github.com/fa7ad">This Guy</a> revamped the UI 😅
+</footer>
 
 <script type="text/javascript" src="textexpander.js"></script>
 <script type="text/javascript">
     var dictionary = {
-        "os":"operating system",
+        "os": "operating system",
         "wtf": "what the fuck",
         "lol": "laughing out loud",
         "roflmao": "rolling on the floor laughing my ass off",
@@ -47,13 +78,18 @@
         "asafp": "as soon as fucking possible",
         "fyvm": "fuck you very much",
         "nfg": "not fucking good",
-        "rofl":"rolling on the floor laughing",
-        "lmao":"laughing my ass off"
+        "rofl": "rolling on the floor laughing",
+        "lmao": "laughing my ass off"
     };
 
-    textExpander([document.querySelector("#ta1")], dictionary);
+    textExpander([document.querySelector("#inpText")], dictionary);
 
-    document.querySelector("div.keys").innerHTML = Object.keys(dictionary).join(", ");
+    var abbrs = Object.keys(dictionary).map(function (data) {
+        return "<code>" + data + "</code>";
+    }).join(", ");
+
+    document.querySelector('.keys').innerHTML = abbrs
 </script>
 </body>
+
 </html>
