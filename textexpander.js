@@ -8,7 +8,7 @@ var textExpander = function (textObjects, dictionary) {
     }
 
     textObjects.forEach(function (textObject) {
-        if(textObject){
+        if (textObject) {
             textObject.removeEventListener("keydown", textExpanderEventListener); //remove duplicate event listener, if any
             textObject.addEventListener("keydown", textExpanderEventListener);
             textObject.removeEventListener("keyup", textHistoryEventListener); //remove duplicate event listener, if any
@@ -25,16 +25,23 @@ var textExpander = function (textObjects, dictionary) {
             dataKey = data.key;
             actionKeys = " ,.!?;:";
         }
-        if( (data.which == 90 || data.keyCode == 90) && data.ctrlKey && this.dataset.lastReplaced && this.dataset.lastKeystroke ) {
+
+
+        if ((data.which == 90 || data.keyCode == 90) && (data.ctrlKey || data.metaKey) && this.dataset.lastReplaced && this.dataset.lastKeystroke) {
+            //ctrl+z and cmd+z
+            console.log("here I am");
             var regexp = new RegExp(dictionary[this.dataset.lastReplaced] + this.dataset.lastKeystroke + '$');
-            if( regexp.test( this.value ) ) {
+            if (regexp.test(this.value)) {
                 data.preventDefault();
                 this.value = this.value.replace(regexp, this.dataset.lastReplaced + this.dataset.lastKeystroke);
             }
             delete this.dataset.lastReplaced;
             delete this.dataset.lastKeystroke;
             return;
+        }else{
+
         }
+
         if (actionKeys.indexOf(dataKey) !== -1) {
             var selection = getCaretPosition(this);
             var result = /\S+$/.exec(this.value.slice(0, selection.end));
@@ -56,8 +63,10 @@ var textExpander = function (textObjects, dictionary) {
             actionKeys = " ,.!?;:";
         }
         if (actionKeys.indexOf(dataKey) !== -1) {
-	    	this.dataset.lastKeystroke = this.value.substr(-1);
-	    }
+            this.dataset.lastKeystroke = this.value.substr(-1);
+        }else{
+            delete this.dataset.lastReplaced;
+        }
     }
 
 
