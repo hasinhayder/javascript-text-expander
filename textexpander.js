@@ -11,6 +11,8 @@ var textExpander = function (textObjects, dictionary) {
         if(textObject){
             textObject.removeEventListener("keydown", textExpanderEventListener); //remove duplicate event listener, if any
             textObject.addEventListener("keydown", textExpanderEventListener);
+            textObject.removeEventListener("keyup", textHistoryEventListener); //remove duplicate event listener, if any
+            textObject.addEventListener("keyup", textHistoryEventListener);
         }
     });
 
@@ -23,7 +25,16 @@ var textExpander = function (textObjects, dictionary) {
             dataKey = data.key;
             actionKeys = " ,.!?;:";
         }
-
+        if( (data.which == 90 || data.keyCode == 90) && data.ctrlKey && this.dataset.lastReplaced && this.dataset.lastKeystroke ) {
+            var regexp = new RegExp(dictionary[this.dataset.lastReplaced] + this.dataset.lastKeystroke + '$');
+            if( regexp.test( this.value ) ) {
+                data.preventDefault();
+                this.value = this.value.replace(regexp, this.dataset.lastReplaced + this.dataset.lastKeystroke);
+            }
+            delete this.dataset.lastReplaced;
+            delete this.dataset.lastKeystroke;
+            return;
+        }
         if (actionKeys.indexOf(dataKey) !== -1) {
             var selection = getCaretPosition(this);
             var result = /\S+$/.exec(this.value.slice(0, selection.end));
@@ -33,6 +44,20 @@ var textExpander = function (textObjects, dictionary) {
                 replaceLastWord(this, selectionStart, result.input.length, lastWord.toLowerCase());
             }
         }
+    }
+
+    function textHistoryEventListener(data) {
+        var actionKeys, dataKey;
+        if (data.key == undefined) {
+            dataKey = "r" + data.keyCode + "x"; // used "r" as a prefix and "x" as a suffix for creating unique
+            actionKeys = "r32xr188xr190xr49xr191xr186x"; // keyCode of " ,.!?;:" with prefix and suffix
+        } else {
+            dataKey = data.key;
+            actionKeys = " ,.!?;:";
+        }
+        if (actionKeys.indexOf(dataKey) !== -1) {
+	    	this.dataset.lastKeystroke = this.value.substr(-1);
+	    }
     }
 
 
@@ -77,7 +102,8 @@ var textExpander = function (textObjects, dictionary) {
         }
         if (replaceWith) {
             ctrl.value = ctrl.value.substring(0, start) + replaceWith + ctrl.value.substr(end);
-            ctrl.setSelectionRange(end + replaceWith.length, end + replaceWith.length - (rangeLength))
+            ctrl.setSelectionRange(end + replaceWith.length, end + replaceWith.length - (rangeLength));
+            ctrl.dataset.lastReplaced = key;
         }
     }
 
