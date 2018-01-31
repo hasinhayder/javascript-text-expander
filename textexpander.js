@@ -11,10 +11,20 @@ var textExpander = function (textObjects, dictionary) {
         if(textObject){
             textObject.removeEventListener("keydown", textExpanderEventListener); //remove duplicate event listener, if any
             textObject.addEventListener("keydown", textExpanderEventListener);
+            textObject.removeEventListener("keyup", textHistoryEventListener); //remove duplicate event listener, if any
+            textObject.addEventListener("keyup", textHistoryEventListener);
         }
     });
 
     function textExpanderEventListener(data) {
+        var actionKeys, dataKey;
+        if (data.key == undefined) {
+            dataKey = "r" + data.keyCode + "x"; // used "r" as a prefix and "x" as a suffix for creating unique
+            actionKeys = "r32xr188xr190xr49xr191xr186x"; // keyCode of " ,.!?;:" with prefix and suffix
+        } else {
+            dataKey = data.key;
+            actionKeys = " ,.!?;:";
+        }
         if( (data.which == 90 || data.keyCode == 90) && data.ctrlKey && this.dataset.lastReplaced && this.dataset.lastKeystroke ) {
             var regexp = new RegExp(dictionary[this.dataset.lastReplaced] + this.dataset.lastKeystroke + '$');
             if( regexp.test( this.value ) ) {
@@ -25,17 +35,31 @@ var textExpander = function (textObjects, dictionary) {
             delete this.dataset.lastKeystroke;
             return;
         }
-        if (" ,.!?;:".indexOf(data.key) !== -1) {
+        if (actionKeys.indexOf(dataKey) !== -1) {
             var selection = getCaretPosition(this);
             var result = /\S+$/.exec(this.value.slice(0, selection.end));
             if (result) {
                 var lastWord = result[0];
                 var selectionStart = result.input.length - lastWord.length;
                 replaceLastWord(this, selectionStart, result.input.length, lastWord.toLowerCase());
-                this.dataset.lastKeystroke = data.key;
             }
         }
     }
+
+    function textHistoryEventListener(data) {
+        var actionKeys, dataKey;
+        if (data.key == undefined) {
+            dataKey = "r" + data.keyCode + "x"; // used "r" as a prefix and "x" as a suffix for creating unique
+            actionKeys = "r32xr188xr190xr49xr191xr186x"; // keyCode of " ,.!?;:" with prefix and suffix
+        } else {
+            dataKey = data.key;
+            actionKeys = " ,.!?;:";
+        }
+        if (actionKeys.indexOf(dataKey) !== -1) {
+	    	this.dataset.lastKeystroke = this.value.substr(-1);
+	    }
+    }
+
 
     function getCaretPosition(ctrl) {
         var start, end;
