@@ -29,7 +29,6 @@ var textExpander = function (textObjects, dictionary) {
 
         if ((data.which == 90 || data.keyCode == 90) && (data.ctrlKey || data.metaKey) && this.dataset.lastReplaced && this.dataset.lastKeystroke) {
             //ctrl+z and cmd+z
-            console.log("here I am");
             var regexp = new RegExp(dictionary[this.dataset.lastReplaced] + this.dataset.lastKeystroke + '$');
             if (regexp.test(this.value)) {
                 data.preventDefault();
