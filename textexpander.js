@@ -15,7 +15,16 @@ var textExpander = function (textObjects, dictionary) {
     });
 
     function textExpanderEventListener(data) {
-        if (" ,.!?;:".indexOf(data.key) !== -1) {
+        var actionKeys, dataKey;
+        if (data.key == undefined) {
+            dataKey = "r" + data.keyCode + "x"; // used "r" as a prefix and "x" as a suffix for creating unique
+            actionKeys = "r32xr188xr190xr49xr191xr186x"; // keyCode of " ,.!?;:" with prefix and suffix
+        } else {
+            dataKey = data.key;
+            actionKeys = " ,.!?;:";
+        }
+
+        if (actionKeys.indexOf(dataKey) !== -1) {
             var selection = getCaretPosition(this);
             var result = /\S+$/.exec(this.value.slice(0, selection.end));
             if (result) {
