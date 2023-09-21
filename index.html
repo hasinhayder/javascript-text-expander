@@ -43,7 +43,7 @@
 
     <p>For example, type this sentence manually(don't copy-paste):
         <br/>
-        <i>"My gd computer's os is windows and fyfi I thought it was a bfd!"</i>
+        <i>"Omg roflmao, idk what I'm doing. Gn."</i>
     </p>
 </section>
 <footer class="wrapper-large ta-center">
@@ -54,14 +54,13 @@
 
 <script type="text/javascript" src="textexpander.js"></script>
 <script type="text/javascript">
-    var dictionary = {
+    const dictionary = {
         "os": "operating system",
         "wtf": "what the fuck",
         "lol": "laughing out loud",
         "roflmao": "rolling on the floor laughing my ass off",
         "stfu": "shut the fuck up",
-        "ms": "micro-fucking-soft",
-        "windows": "a complete fucking crap",
+        "ms": "microsoft",
         "fu": "fuck you",
         "omg": "oh my god",
         "gtfo": "get the fuck out",
@@ -70,23 +69,23 @@
         "fyi": "for your information",
         "gn": "good night",
         "gd": "goddamn",
-        "ftw": "fuck the world", //or for the win? he he
+        "ftw": "for the win", //or for the win? he he
         "idk": "I dont know",
         "ikr": "i know right",
         "idgaf": "I don't give a fuck",
         "fml": "fuck my life",
-        "dilligaf": "do I look like I give a fuck",
         "rtfm": "read the fucking manual",
-        "asafp": "as soon as fucking possible",
-        "fyvm": "fuck you very much",
+        "asap": "as soon as possible",
         "nfg": "not fucking good",
+        "ng": "not good",
         "rofl": "rolling on the floor laughing",
-        "lmao": "laughing my ass off"
+        "lmao": "laughing my ass off",
+        "xoxo":"hugs and kisses"
     };
 
     textExpander([document.querySelector("#inpText")], dictionary);
 
-    var abbrs = Object.keys(dictionary).map(function (data) {
+    const abbrs = Object.keys(dictionary).map(function (data) {
         return "<code>" + data + "</code>";
     }).join(", ");
 

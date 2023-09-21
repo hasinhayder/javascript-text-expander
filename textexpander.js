@@ -1,117 +1,100 @@
-var textExpander = function (textObjects, dictionary) {
-    "use strict";
-    if (!dictionary || !textObjects) {
-        return;
-    }
-    if (!(textObjects instanceof Array)) {
-        textObjects = [textObjects];
-    }
+const textExpander = (textObjects, dictionary) => {
+    // textObjects: A single text object or an array of text objects
+    // dictionary: An object with keys and values to replace
+    if (!dictionary || !textObjects) return;
 
-    textObjects.forEach(function (textObject) {
-        if (textObject) {
-            textObject.removeEventListener("keydown", textExpanderEventListener); //remove duplicate event listener, if any
-            textObject.addEventListener("keydown", textExpanderEventListener);
-            textObject.removeEventListener("keyup", textHistoryEventListener); //remove duplicate event listener, if any
-            textObject.addEventListener("keyup", textHistoryEventListener);
-        }
-    });
+    // Convert textObjects to an array if it isn't already
+    const textObjectsArray = Array.isArray(textObjects) ? textObjects : [textObjects];
+    
+    // Define the keys that will trigger the text expansion
+    // Different browser support different key codes, so we'll use the key property if it's available
+    // Otherwise, we'll use the keyCode property and convert it to a string
+    const actionKeysByType = {
+        true: " ,.!?;:",
+        false: "r32xr188xr190xr49xr191xr186x" // Space, comma, period, exclamation point, question mark, semicolon, colon
+    };
 
-    function textExpanderEventListener(data) {
-        var actionKeys, dataKey;
-        if (data.key == undefined) {
-            dataKey = "r" + data.keyCode + "x"; // used "r" as a prefix and "x" as a suffix for creating unique
-            actionKeys = "r32xr188xr190xr49xr191xr186x"; // keyCode of " ,.!?;:" with prefix and suffix
-        } else {
-            dataKey = data.key;
-            actionKeys = " ,.!?;:";
-        }
+    const getActionKeys = (key) => actionKeysByType[key !== undefined];
 
+    // Expand text on keydown
+    const expandText = event => { 
+        const { key, keyCode, ctrlKey, metaKey, target } = event;
+        const dataKey = key ?? `r${keyCode}x`;
+        const actionKeys = getActionKeys(key);
 
-        if ((data.which == 90 || data.keyCode == 90) && (data.ctrlKey || data.metaKey) && this.dataset.lastReplaced && this.dataset.lastKeystroke) {
-            //ctrl+z and cmd+z
-            var regexp = new RegExp(dictionary[this.dataset.lastReplaced] + this.dataset.lastKeystroke + '$');
-            if (regexp.test(this.value)) {
-                data.preventDefault();
-                this.value = this.value.replace(regexp, this.dataset.lastReplaced + this.dataset.lastKeystroke);
+        if ((keyCode === 90) && (ctrlKey || metaKey) && target.dataset.lastReplaced && target.dataset.lastKeystroke) {
+            const regexp = new RegExp(dictionary[target.dataset.lastReplaced] + target.dataset.lastKeystroke + '$');
+            if (regexp.test(target.value)) {
+                event.preventDefault();
+                target.value = target.value.replace(regexp, target.dataset.lastReplaced + target.dataset.lastKeystroke);
             }
-            delete this.dataset.lastReplaced;
-            delete this.dataset.lastKeystroke;
+            delete target.dataset.lastReplaced;
+            delete target.dataset.lastKeystroke;
             return;
         }
 
-        if (actionKeys.indexOf(dataKey) !== -1) {
-            var selection = getCaretPosition(this);
-            var result = /\S+$/.exec(this.value.slice(0, selection.end));
-            if (result) {
-                var lastWord = result[0];
-                var selectionStart = result.input.length - lastWord.length;
-                replaceLastWord(this, selectionStart, result.input.length, lastWord);
-            }
+        if (actionKeys.includes(dataKey)) {
+            const selection = getCaretPosition(target);
+            const result = /\S+$/.exec(target.value.slice(0, selection.end));
+            if (result) replaceLastWord(target, result.input.length - result[0].length, result.input.length, result[0]);
         }
-    }
+    };
 
-    function textHistoryEventListener(data) {
-        var actionKeys, dataKey;
-        if (data.key == undefined) {
-            dataKey = "r" + data.keyCode + "x"; // used "r" as a prefix and "x" as a suffix for creating unique
-            actionKeys = "r32xr188xr190xr49xr191xr186x"; // keyCode of " ,.!?;:" with prefix and suffix
+    // Store the last keystroke for later use
+    const keyHistory = ({ key, keyCode, target }) => {
+        if (getActionKeys(key).includes(key ?? `r${keyCode}x`)) {
+            target.dataset.lastKeystroke = target.value.slice(-1);
         } else {
-            dataKey = data.key;
-            actionKeys = " ,.!?;:";
+            delete target.dataset.lastReplaced;
         }
-        if (actionKeys.indexOf(dataKey) !== -1) {
-            this.dataset.lastKeystroke = this.value.substr(-1);
-        }else{
-            delete this.dataset.lastReplaced;
-        }
+    };
+
+    // Add event listeners to all text objects
+    for (const textObject of textObjectsArray) {
+        if (!textObject) continue;
+
+        ["keydown", "keyup"].forEach(evtName => {
+            const listener = evtName === "keydown" ? expandText : keyHistory;
+            textObject.removeEventListener(evtName, listener);
+            textObject.addEventListener(evtName, listener);
+        });
     }
 
+    // Helper function to get the caret position in a text field
+    const getCaretPosition = ctrl => {
+        if (ctrl.setSelectionRange) return { start: ctrl.selectionStart, end: ctrl.selectionEnd };
+        
+        if (document.selection && document.selection.createRange) {
+            const range = document.selection.createRange();
+            const start = 0 - range.duplicate().moveStart('character', -100000);
+            return { start, end: start + range.text.length };
+        }
 
-    function getCaretPosition(ctrl) {
-        var start, end;
-        if (ctrl.setSelectionRange) {
-            start = ctrl.selectionStart;
-            end = ctrl.selectionEnd;
-        } else if (document.selection && document.selection.createRange) {
-            var range = document.selection.createRange();
-            start = 0 - range.duplicate().moveStart('character', -100000);
-            end = start + range.text.length;
-        }
-        return {
-            start: start,
-            end: end
-        }
-    }
+        return { start: 0, end: 0 };
+    };
 
-    function replaceLastWord(ctrl, start, end, key) {
-        var isCap = key.toUpperCase() === key;
-        var rangeLength = end - start;
-        var replaceWith = dictionary[key.toLowerCase()];
-        if (!replaceWith) {
-            return;
-        }
-        if (ctrl.setSelectionRange) {
-            /* WebKit */
-            ctrl.focus();
-            ctrl.setSelectionRange(start, end);
-        }
-        else if (ctrl.createTextRange) {
-            /* IE */
-            var range = ctrl.createTextRange();
-            rangctrl.collapse(true);
-            rangctrl.moveEnd('character', end);
-            rangctrl.moveStart('character', start);
-            rangctrl.select();
-        }
-        else if (ctrl.selectionStart) {
-            ctrl.selectionStart = start;
-            ctrl.selectionEnd = end;
-        }
-        if (replaceWith) {
-            ctrl.value = ctrl.value.substring(0, start) + (isCap ? replaceWith.toUpperCase() : replaceWith) + ctrl.value.substr(end);
-            ctrl.setSelectionRange(end + replaceWith.length, end + replaceWith.length - (rangeLength));
-            ctrl.dataset.lastReplaced = key;
-        }
-    }
-
+    // Helper function to replace the last word in a text field
+    const replaceLastWord = (ctrl, start, end, key) => {
+        const replaceWith = dictionary[key.toLowerCase()];
+        if (!replaceWith) return;
+    
+        // Determine the correct replacement based on the original word's case.
+        const replaced = key.charAt(0) === key.charAt(0).toUpperCase() ? 
+                         capitalizeFirstLetter(replaceWith) : 
+                         replaceWith;
+    
+        const preText = ctrl.value.substring(0, start);
+        const postText = ctrl.value.substr(end);
+        ctrl.value = preText + replaced + postText;
+    
+        const adjustedPosition = end + replaced.length - key.length;
+        ctrl.setSelectionRange(adjustedPosition, adjustedPosition);
+        ctrl.dataset.lastReplaced = key;
+    };
+    
+    // Helper function to capitalize the first letter of a string
+    const capitalizeFirstLetter = (string) => {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    };
+    
 };
